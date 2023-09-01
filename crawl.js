@@ -15,14 +15,14 @@ function getURLsFomHTML(htmlBODY, baseURL) {
       } catch (error) {
         console.log(`Invalid relative url: ${error.message}`);
       }
-    } else {
-      // absolute url
-      try {
-        const urlObj = new URL(`${link.href}`);
-        urls.push(urlObj.href);
-      } catch (error) {
-        console.log(`Invalid absolute url: ${error.message}`);
-      }
+    }
+
+    // else absolute url
+    try {
+      const urlObj = new URL(`${link.href}`);
+      urls.push(urlObj.href);
+    } catch (error) {
+      console.log(`Invalid absolute url: ${error.message}`);
     }
   });
 
@@ -43,7 +43,38 @@ function normalizeURL(urlString) {
   return hostPath;
 }
 
+async function crawlPage(currentURL) {
+  try {
+    // account for invalid URL
+    const res = await fetch(currentURL);
+
+    // account for status error status code
+    if (res.status > 399) {
+      console.log(
+        `Error while fetching with status code: ${error.status}, on page: ${currentURL}`
+      );
+      return;
+    }
+
+    // check if its valid html
+    const contentType = res.headers.get('content-type');
+    if (!contentType.includes('text/html')) {
+      console.log(
+        `Invalid html in response, content type: ${contentType}, on page: ${currentURL}`
+      );
+      return;
+    }
+
+    console.log(await res.text());
+  } catch (error) {
+    console.log(
+      `Error while fetching: ${error.message}, on page: ${currentURL}`
+    );
+  }
+}
+
 module.exports = {
   normalizeURL,
   getURLsFomHTML,
+  crawlPage,
 };
