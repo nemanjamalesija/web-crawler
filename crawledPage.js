@@ -9,16 +9,18 @@ class CrawledPage {
     const urls = [];
     const dom = new JSDOM(htmlBody);
     const aElements = dom.window.document.querySelectorAll('a');
+
     for (const aElement of aElements) {
+      // if relative url concatinate with base url
       if (aElement.href.slice(0, 1) === '/') {
-        // relative url
         try {
           urls.push(new URL(aElement.href, baseURL).href);
         } catch (err) {
           console.log(`${err.message}: ${aElement.href}`);
         }
-      } else {
-        // absolute url
+      }
+      // else absolute url, return links href
+      else {
         try {
           urls.push(new URL(aElement.href).href);
         } catch (err) {
@@ -34,6 +36,8 @@ class CrawledPage {
 
     // remove protocol
     let fullPath = `${urlObj.host}${urlObj.pathname}`;
+
+    // account for href ending with /
     if (fullPath.length > 0 && fullPath.slice(-1) === '/') {
       fullPath = fullPath.slice(0, -1);
     }
@@ -41,9 +45,11 @@ class CrawledPage {
   }
 
   async crawlPage(baseURL, currentURL) {
-    // if this is an offsite URL, push to external links array, then return
     const currentUrlObj = new URL(currentURL);
     const baseUrlObj = new URL(baseURL);
+
+    // if an offsite URL
+    // push to external links array, then return
     if (currentUrlObj.hostname !== baseUrlObj.hostname) {
       this.externalLinks.push(currentURL);
       return;
@@ -51,42 +57,45 @@ class CrawledPage {
 
     const normalizedURL = this.normalizeURL(currentURL);
 
-    // if already visited this page
-    // just increase the count and don't repeat
-    // the http request
+    // if already visited this page, increase its count in the map
     if (this.pages[normalizedURL] > 0) {
       this.pages[normalizedURL]++;
 
+      //don't repeat the http request
       return;
     }
 
-    // initialize this page in the map
-    // since it doesn't exist yet
-
+    // if first occurence of the page, initialize it in the map
     this.pages[normalizedURL] = 1;
 
     // fetch and parse the html of the currentURL
     console.log(`crawling ${currentURL}`);
     let htmlBody = '';
     try {
-      const resp = await fetch(currentURL);
+      const res = await fetch(currentURL);
 
       // account for status error status code
-      if (resp.status > 399) {
-        console.log(`Got HTTP error, status code: ${resp.status}`);
+      if (res.status > 399) {
+        console.log(`Got HTTP error, status code: ${res.status}`);
         return;
       }
-      const contentType = resp.headers.get('content-type');
+
+      // account for invalid html
+      const contentType = res.headers.get('content-type');
       if (!contentType.includes('text/html')) {
         console.log(`Got non-html response: ${contentType}`);
         return;
       }
-      htmlBody = await resp.text();
+
+      // if all ok read html
+      htmlBody = await res.text();
     } catch (err) {
       console.log(err.message);
     }
 
     const nextURLs = this.getURLsFromHTML(htmlBody, baseURL);
+
+    // crawl page recursively
     for (const nextURL of nextURLs) {
       await this.crawlPage(baseURL, nextURL);
     }

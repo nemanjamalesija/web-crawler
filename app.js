@@ -1,4 +1,4 @@
-const { CrawledPage } = require('./crawl.js');
+const { CrawledPage } = require('./crawledPage.js');
 const { printReport } = require('./report.js');
 
 async function main() {

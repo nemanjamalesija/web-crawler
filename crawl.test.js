@@ -1,4 +1,4 @@
-const { normalizeURL, getURLsFomHTML } = require('./crawl.js');
+const { normalizeURL, getURLsFomHTML } = require('./crawledPage.js');
 const { test, expect } = require('@jest/globals');
 
 // strip protocol
