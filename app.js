@@ -1,4 +1,4 @@
-const { CrawledPage } = require('./crawledPage.js');
+const { CrawledPage } = require('./classes/crawledPage.js');
 const { printReport } = require('./report.js');
 const { writeImages } = require('./writeImages.js');
 

@@ -1,4 +1,5 @@
-const { normalizeURL, getURLsFomHTML } = require('./crawledPage.js');
+const { normalizeURL } = require('../helpers/normalizeURL.js');
+// getURLsFomHTML tested and moved to the class CrawledPage
 const { test, expect } = require('@jest/globals');
 
 // strip protocol
