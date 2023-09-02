@@ -13,7 +13,7 @@ function sortPages(pages) {
 
 // printReport takes a dictionary of pages and prints them
 // to the console in a human-friendly way
-function printReport(pages, externalLinks) {
+function printReport(pages, externalLinks, imagesURLArray) {
   console.log('==========');
   console.log('REPORT');
   console.log('==========');
@@ -23,6 +23,9 @@ function printReport(pages, externalLinks) {
     const count = sortedPage[1];
     console.log(`Found ${count} internal links to ${url}`);
   }
+
+  console.log('========');
+  console.log('TOTAL IMAGES SCRAPPED: ' + imagesURLArray.length);
 
   console.log('========');
   console.log('EXTERNAL LINKS BELOW:');

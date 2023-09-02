@@ -3,10 +3,37 @@ const { JSDOM } = require('jsdom');
 class CrawledPage {
   pages = {};
   externalLinks = [];
+  srcs = [];
   constructor() {}
+
+  getUrl(link, baseUrl) {
+    if (link.includes('http')) {
+      return link;
+    } else if (link.startsWith('/')) {
+      return `${baseUrl}/${link}`;
+    } else {
+      return `${baseUrl}/${link}`;
+    }
+  }
+
+  getImagesFromHTML(htmlBody, baseURL) {
+    const dom = new JSDOM(htmlBody);
+    const imgElements = dom.window.document.querySelectorAll('img');
+
+    for (const imgElement of imgElements) {
+      try {
+        this.srcs.push(this.getUrl(imgElement.getAttribute('src'), baseURL));
+      } catch (error) {
+        console.log(`${error.message}: ${imgElement.src}`);
+      }
+    }
+
+    return this.srcs;
+  }
 
   getURLsFromHTML(htmlBody, baseURL) {
     const urls = [];
+
     const dom = new JSDOM(htmlBody);
     const aElements = dom.window.document.querySelectorAll('a');
 
@@ -28,6 +55,7 @@ class CrawledPage {
         }
       }
     }
+
     return urls;
   }
 
@@ -94,6 +122,7 @@ class CrawledPage {
     }
 
     const nextURLs = this.getURLsFromHTML(htmlBody, baseURL);
+    this.getImagesFromHTML(htmlBody, baseURL);
 
     // crawl page recursively
     for (const nextURL of nextURLs) {

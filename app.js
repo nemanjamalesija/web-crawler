@@ -1,5 +1,6 @@
 const { CrawledPage } = require('./crawledPage.js');
 const { printReport } = require('./report.js');
+const { writeImages } = require('./writeImages.js');
 
 async function main() {
   if (process.argv.length < 3) {
@@ -17,7 +18,8 @@ async function main() {
 
   await crawledPage.crawlPage(baseURL, baseURL);
 
-  printReport(crawledPage.pages, crawledPage.externalLinks);
+  writeImages(crawledPage.srcs);
+  printReport(crawledPage.pages, crawledPage.externalLinks, crawledPage.srcs);
 }
 
 main();
