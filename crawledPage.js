@@ -6,13 +6,34 @@ class CrawledPage {
   srcs = [];
   constructor() {}
 
-  getUrl(link, baseUrl) {
-    if (link.includes('http')) {
-      return link;
-    } else if (link.startsWith('/')) {
-      return `${baseUrl}/${link}`;
+  getLinksURL(link, baseURL) {
+    // if relative url concatinate with base url
+    if (link.href.slice(0, 1) === '/') {
+      try {
+        const linkURL = new URL(link.href, baseURL).href;
+        return linkURL;
+      } catch (err) {
+        console.log(`${err.message}: ${link.href}`);
+      }
+    }
+    // else absolute url, return links href
+    else {
+      try {
+        const linkURL = new URL(link.href).href;
+        return linkURL;
+      } catch (err) {
+        console.log(`${err.message}: ${link.href}`);
+      }
+    }
+  }
+
+  getImagesURL(src, baseURL) {
+    if (src.includes('http')) {
+      return src;
+    } else if (src.startsWith('/')) {
+      return `${baseURL}/${src}`;
     } else {
-      return `${baseUrl}/${link}`;
+      return `${baseURL}/${src}`;
     }
   }
 
@@ -22,7 +43,9 @@ class CrawledPage {
 
     for (const imgElement of imgElements) {
       try {
-        this.srcs.push(this.getUrl(imgElement.getAttribute('src'), baseURL));
+        this.srcs.push(
+          this.getImagesURL(imgElement.getAttribute('src'), baseURL)
+        );
       } catch (error) {
         console.log(`${error.message}: ${imgElement.src}`);
       }
@@ -33,26 +56,15 @@ class CrawledPage {
 
   getURLsFromHTML(htmlBody, baseURL) {
     const urls = [];
-
     const dom = new JSDOM(htmlBody);
     const aElements = dom.window.document.querySelectorAll('a');
 
     for (const aElement of aElements) {
-      // if relative url concatinate with base url
-      if (aElement.href.slice(0, 1) === '/') {
-        try {
-          urls.push(new URL(aElement.href, baseURL).href);
-        } catch (err) {
-          console.log(`${err.message}: ${aElement.href}`);
-        }
-      }
-      // else absolute url, return links href
-      else {
-        try {
-          urls.push(new URL(aElement.href).href);
-        } catch (err) {
-          console.log(`${err.message}: ${aElement.href}`);
-        }
+      try {
+        const linkUrl = this.getLinksURL(aElement, baseURL);
+        urls.push(linkUrl);
+      } catch (err) {
+        console.log(`${err.message}: ${aElement.href}`);
       }
     }
 
